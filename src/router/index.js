@@ -1,10 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Importação das Views (Páginas)
-import HomeView from '../views/HomeView.vue'
-import AvaliacoesView from '../views/AvaliacoesView.vue'
-import RankingView from '../views/RankingView.vue'
-
 const routes = [
   {
     path: '/',
@@ -25,26 +20,20 @@ const routes = [
     meta: { title: 'Ranking Geral' }
   },
   {
-    path: '/formulario',
-    name: 'formulario',
-    component: () => import('../views/FormularioView.vue'),
-    meta: { title: 'Formulário de Avaliação' }
+    path: '/cafe',
+    name: 'cafe',
+    component: () => import('../views/CafeView.vue'),
+    meta: { title: 'Cafés' }
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-  // Scroll behavior (voltar ao topo ao mudar de rota)
-  scrollBehavior() {
-    return { top: 0 }
-  }
+  routes
 })
 
-// Atualizar título da página dinamicamente
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'Campeonato SCA'
+  document.title = to.meta.title || 'Campeonato de Cafés'
   next()
 })
-
 export default router
