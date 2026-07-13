@@ -28,7 +28,10 @@ const qtdAvaliacoes = ref(2)
           </div>
         </li>
       </ul>
-      <button>Ver Avaliaçoes</button>
+      <router-link to="/ranking">
+        <button>Ver Avaliaçoes</button>
+      </router-link>
+
     </section>
   </main>
 </template>

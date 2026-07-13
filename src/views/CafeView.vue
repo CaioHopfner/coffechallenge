@@ -15,14 +15,13 @@ import cafes from '../data/product.js'
           <div>
           <h2>{{ cafe.nome }}</h2>
           <p>Origem: {{ cafe.origem }}</p>
-          <p>Nota: {{ cafe.nota }}</p>
           </div>
 
         </div>
         <div>
-          <button>
-            Avaliar
-          </button>
+          <router-link to="/avaliacoes">
+            <button>Avaliar</button>
+          </router-link>
         </div>
       </li>
     </ul>
