@@ -1,16 +1,55 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
+const props = defineProps({
+  cafes: {
+    type: Array,
+    required: true,
+  },
+})
 const emit = defineEmits(['salvar'])
 
-const cafeSelecionado = ref(null)
-const formulario = ref({
+const STORAGE_KEY = 'cafes-avaliacoes'
+const DEFAULT_FORM = {
   aroma: 0,
   docura: 0,
   acidez: 0,
   corpo: 0,
   finalizacao: 0,
-})
+}
+
+const cafeSelecionado = ref(null)
+const formulario = ref({ ...DEFAULT_FORM })
+
+function restoreAvaliacoes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    if (!Array.isArray(saved)) return
+
+    saved.forEach((entry) => {
+      const cafe = props.cafes.find((item) => item.id === entry.id)
+      if (cafe) {
+        Object.assign(cafe, entry)
+      }
+    })
+  } catch (error) {
+    console.warn('Não foi possível restaurar avaliações salvas:', error)
+  }
+}
+
+restoreAvaliacoes()
+
+watch(
+  cafeSelecionado,
+  (cafe) => {
+    if (cafe?.avaliacao) {
+      formulario.value = { ...cafe.avaliacao }
+    } else {
+      formulario.value = { ...DEFAULT_FORM }
+    }
+  },
+  { immediate: true },
+)
 
 const mediaCalculada = computed(() => {
   const f = formulario.value
@@ -21,15 +60,31 @@ const mediaCalculada = computed(() => {
   return (soma / totalCampos).toFixed(1)
 })
 
+function persistAvaliacoes() {
+  const payload = props.cafes.map(({ id, nome, origem, nota, avaliacao }) => ({
+    id,
+    nome,
+    origem,
+    nota,
+    avaliacao,
+  }))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+}
+
 function salvar() {
   if (!cafeSelecionado.value) {
     alert('Por favor, selecione um café')
     return
   }
 
-  cafeSelecionado.value.nota = mediaCalculada.value
+  const cafe = cafeSelecionado.value
+  cafe.avaliacao = { ...formulario.value }
+  cafe.nota = mediaCalculada.value
+
+  persistAvaliacoes()
+
   emit('salvar', {
-    cafe: cafeSelecionado.value,
+    cafe,
     nota: mediaCalculada.value,
   })
 }
@@ -46,6 +101,21 @@ function salvar() {
             {{ cafe.nome }}
           </option>
         </select>
+      </div>
+
+      <div v-if="cafeSelecionado" class="saved-notes">
+        <h2>Notas salvas</h2>
+        <div v-if="cafeSelecionado.avaliacao">
+          <ul>
+            <li>Aroma: {{ cafeSelecionado.avaliacao.aroma }}</li>
+            <li>Doçura: {{ cafeSelecionado.avaliacao.docura }}</li>
+            <li>Acidez: {{ cafeSelecionado.avaliacao.acidez }}</li>
+            <li>Corpo: {{ cafeSelecionado.avaliacao.corpo }}</li>
+            <li>Finalização: {{ cafeSelecionado.avaliacao.finalizacao }}</li>
+            <li class="nota-geral">Média atual: {{ cafeSelecionado.nota }}</li>
+          </ul>
+        </div>
+        <p v-else>Ainda não há notas salvas para este café.</p>
       </div>
 
       <ul class="lista-dupla">
@@ -98,6 +168,41 @@ select {
 label {
   font-size: 1.1rem;
   font-weight: 570;
+}
+
+.saved-notes {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  background: #fffefc;
+}
+
+.saved-notes h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.saved-notes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.saved-notes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  background: #fff5ec;
+}
+
+.nota-geral {
+  font-weight: 700;
 }
 
 .lista-dupla {

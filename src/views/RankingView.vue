@@ -1,18 +1,12 @@
 <script setup>
-import cafes from '../data/product.js'
 import { computed } from 'vue'
+import cafes from '../data/product.js'
+import CoffeeCard from '../components/CoffeeCard.vue'
 
 const cafesOrdenados = computed(() => {
-  const cafesComNotaNumerica = []
-
-  for (const cafe of cafes) {
-    cafesComNotaNumerica.push({
-      ...cafe,
-      nota: Number(cafe.nota)
-    })
-  }
-
-  return cafesComNotaNumerica.sort((proximo, atual) => atual.nota - proximo.nota)
+  return [...cafes]
+    .map((cafe) => ({ ...cafe, nota: Number(cafe.nota) }))
+    .sort((proximo, atual) => atual.nota - proximo.nota)
 })
 </script>
 
@@ -20,11 +14,14 @@ const cafesOrdenados = computed(() => {
   <div class="ranking-container">
     <h2>Ranking de Cafés</h2>
 
-    <ul>
-      <li v-for="cafe in cafesOrdenados" :key="cafe.id">
-        <span class="nome">{{ cafe.nome }}</span>
-        <span class="nota">{{ cafe.nota.toFixed(1) }}</span>
-      </li>
+    <ul class="ranking-list">
+      <CoffeeCard
+        v-for="(cafe, index) in cafesOrdenados"
+        :key="cafe.id"
+        :cafe="cafe"
+        :position="index + 1"
+        :show-details-button="true"
+      />
     </ul>
   </div>
 </template>
@@ -36,31 +33,12 @@ const cafesOrdenados = computed(() => {
   gap: 1rem;
 }
 
-ul {
+.ranking-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.9rem 1rem;
-  border: 1px solid #f2d5c4;
-  border-radius: 8px;
-  background: #fffaf7;
-}
-
-.nome {
-  font-weight: 600;
-}
-
-.nota {
-  color: #771212;
-  font-weight: 700;
 }
 </style>
