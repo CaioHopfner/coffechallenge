@@ -1,13 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-  cafes: {
-    type: Array,
-    required: true,
-  },
-})
-
 const emit = defineEmits(['salvar'])
 
 const cafeSelecionado = ref(null)
